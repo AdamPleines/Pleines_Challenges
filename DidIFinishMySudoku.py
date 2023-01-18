@@ -1,5 +1,7 @@
 # Thanks for looking at my code. I hope you like what I have presented. I wrote it w/o any packages or many 'complex' functions in the hopes that I can convert it to C/C++
-# I made it NxN scalable at the cost of readability and possibly conversion potential...
+# I made it NxN scalable at the cost of readability and possibly conversion potential.
+#This now excludes already tested comparisons (i.e. when board[i][j] = board[4][4] and k = 1,2,3 because board[1-3][1-3] and k=4 has already been tested)
+#further optimization could be done by joining together the loops of the processes instead of a separate for loop of N for i & j each time
 
 def block_check(board, N):
     block_check = True
@@ -10,20 +12,24 @@ def block_check(board, N):
             # gentle req that number is a valid integer between 1 & N
             if board[j][i] == 0 or type(board[j][i]) != int:
                 block_check = False
+                print("Block failed")
                 return block_check
             elif 1 <= board[j][i] <= N:
                 # There's only 3 rows/columns per block
                 # need to remove the spillover inside the block when comparing inside the blocks
-                for x in range(sqrtN):
-                    for y in range(sqrtN):
-                        if x == i%(sqrtN) and y == j%(sqrtN):
+                for x in range(sqrtN): #0,1,2 if N=9 for rows
+                    for y in range(sqrtN): #0,1,2 if N=9 for columns
+                        if x <= i%(sqrtN) and y <= j%(sqrtN): #if x=remainder(i) and y=remainder(j), matches to same square as [j][i], lesser squares already checked
                             continue
-                        elif board[j][i] != board[j-j%(sqrtN)+y][i-i%(sqrtN)+x]:
+                        elif board[j][i] != board[j-j%(sqrtN)+y][i-i%(sqrtN)+x] : #w/ matches eliminated,val-val%sqrtN indexes to the current block
                             continue
                         else:
                             block_check = False
+                            print("Block failed")
+                            return block_check
             else:
                 block_check = False
+                print("Block failed")
                 return block_check
     return block_check
 
@@ -35,19 +41,22 @@ def column_check(board, N):
             # gentle req that number is a valid integer between 1 & N
             if board[j][i] == 0 or type(board[j][i]) != int:
                 column_check = False
+                print("Column failed")
                 return column_check
             elif 1 <= board[j][i] <= N:
                 # if the current position is 1-N, all is fine.
-                for k in range(N):
-                    if k != j and board[j][i] != board[k][i]:
+                for k in range(1,N):
+                    if k > j and board[j][i] != board[k][i]:
                         continue
-                    elif k == j:
+                    elif k <= j:
                         continue
                     else:
                         column_check = False
+                        print("Column failed")
                         return column_check
             else:
                 column_check = False
+                print("Column failed")
                 return column_check
     return column_check
 
@@ -59,19 +68,22 @@ def row_checker(board, N):
             # gentle req that number is a valid integer between 1 & N
             if board[j][i] == 0 or type(board[j][i]) != int:
                 row_check = False
+                print("Row failed")
                 return row_check
             elif 1 <= board[j][i] <= N:
                 # if the current position is not 0 (is 1-N) and the current position does not equal any others in row, row is okay
                 for k in range(N):
-                    if k != i and board[j][i] != board[j][k]:
+                    if k > i and board[j][i] != board[j][k]:
                         continue
-                    elif k == i:
+                    elif k <= i:
                         continue
                     else:
                         row_check = False
+                        print("Row failed")
                         return row_check
             else:
                 row_check = False
+                print("Row failed.")
                 return row_check
     return row_check
 
@@ -84,7 +96,7 @@ def completion_check(board):
                 return True
             else:
                 return False
-        # This is for the remaining 99% of cases. SHOULD verify its a valid matrix size (has a sqrt). Verifies matrix dimensions are equivalent and are valid style.        
+        # This is for all other cases. Verifies its a valid matrix size (has a sqrt). Verifies matrix dimensions are equivalent and are valid style.        
         elif len(board) >= 1 and type(board[0]) is list and len(board) == len(board[0]) and int(len(board)**(1/2))**2 == len(board):
             N = len(board)
             row_completed = row_checker(board, N)
@@ -98,8 +110,10 @@ def completion_check(board):
             else:
                 return False
         else: 
+            print("Invalid board size provided.")
             return False    
     else:
+        print("No list provided.")
         return False
 
 # class Sudoku(object):
@@ -117,6 +131,16 @@ def completion_check(board):
 
 def main():
     # example tests: correct 9x9 for testing
+    board = [[1, 3, 2, 5, 7, 9, 4, 6, 8]
+            ,[4, 9, 8, 2, 6, 1, 3, 7, 5]
+            ,[7, 5, 6, 3, 8, 4, 2, 1, 9]
+            ,[6, 4, 3, 1, 5, 8, 7, 9, 2]
+            ,[5, 2, 1, 7, 9, 3, 8, 4, 6]
+            ,[9, 8, 7, 4, 2, 6, 5, 3, 1]
+            ,[2, 1, 4, 9, 3, 5, 6, 8, 7]
+            ,[3, 6, 5, 8, 1, 7, 9, 2, 4]
+            ,[8, 7, 9, 6, 4, 2, 1, 5, 3]]
+    # incorrect 9x9
     # board = [[1, 3, 2, 5, 7, 9, 4, 6, 8]
     #         ,[4, 9, 8, 2, 6, 1, 3, 7, 5]
     #         ,[7, 5, 6, 3, 8, 4, 2, 1, 9]
@@ -125,8 +149,8 @@ def main():
     #         ,[9, 8, 7, 4, 2, 6, 5, 3, 1]
     #         ,[2, 1, 4, 9, 3, 5, 6, 8, 7]
     #         ,[3, 6, 5, 8, 1, 7, 9, 2, 4]
-    #         ,[8, 7, 9, 6, 4, 2, 1, 5, 3]]
-    # incorrect 10x9
+    #         ,[8, 7, 9, 6, 4, 2, 1, 5, 9]]
+    # invalid 10x9
     # board = [[1, 3, 2, 5, 7, 9, 4, 6, 8, 1]
     #         ,[4, 9, 8, 2, 6, 1, 3, 7, 5, 1]
     #         ,[7, 5, 6, 3, 8, 4, 2, 1, 9, 1]
