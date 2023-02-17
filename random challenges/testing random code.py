@@ -7,10 +7,10 @@ class Node:
 
 # A Linked List class with a single head node
 class LinkedList:
-  def __init__(self):  
-    self.head = None
+  def __init__(LL):  
+    LL.head = None
 
 # Linked List with a single node
 LL = LinkedList()
 LL.head = Node(3)
-print(LL.head.Node)
+print(LinkedList)
